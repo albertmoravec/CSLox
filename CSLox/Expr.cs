@@ -26,13 +26,13 @@ public abstract class Expr {
 
         public Expr Expression { get; set; } = expression;
     }
-    public class Literal(object value) : Expr {
+    public class Literal(object? value) : Expr {
         public override TR Accept<TR>(IVisitor<TR> visitor)
         {
             return visitor.VisitLiteralExpr(this);
         }
 
-        public object Value { get; set; } = value;
+        public object? Value { get; set; } = value;
     }
     public class Unary(Token oper, Expr right) : Expr {
         public override TR Accept<TR>(IVisitor<TR> visitor)
