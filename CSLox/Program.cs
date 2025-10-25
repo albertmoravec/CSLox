@@ -5,6 +5,8 @@ class Program
     private static bool hadError = false;
     private static bool hadRuntimeError = false;
 
+    private static Interpreter interpreter = new Interpreter();
+
     public static void Main(string[] args)
     {
         switch (args.Length)
@@ -68,6 +70,8 @@ class Program
         {
             return;
         }
+
+        interpreter.Interpret(expression);
 
         Console.WriteLine(new AstPrinter().Print(expression));
     }
