@@ -54,11 +54,16 @@ class Program
     {
         var scanner = new Scanner(source);
         var tokens = scanner.ScanTokens();
+        var parser = new Parser(tokens);
+        var expression = parser.Parse();
 
-        foreach (var token in tokens)
+        // Stop if there was a syntax error.
+        if (hadError)
         {
-            Console.WriteLine(token);
+            return;
         }
+
+        Console.WriteLine(new AstPrinter().Print(expression));
     }
 
     public static void Error(int line, string message)
@@ -70,5 +75,17 @@ class Program
     {
         Console.WriteLine($"[line {line}] Error{where}: {message}");
         hadError = true;
+    }
+
+    public static void Error(Token token, string message)
+    {
+        if (token.Type == TokenType.Eof)
+        {
+            Report(token.Line, " at end", message);
+        }
+        else
+        {
+            Report(token.Line, $" at '{token.Lexeme}'", message);
+        }
     }
 }
