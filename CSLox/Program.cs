@@ -3,6 +3,7 @@
 class Program
 {
     private static bool hadError = false;
+    private static bool hadRuntimeError = false;
 
     public static void Main(string[] args)
     {
@@ -30,6 +31,11 @@ class Program
         if (hadError)
         {
             Environment.Exit(65);
+        }
+
+        if (hadRuntimeError)
+        {
+            Environment.Exit(70);
         }
     }
 
@@ -87,5 +93,11 @@ class Program
         {
             Report(token.Line, $" at '{token.Lexeme}'", message);
         }
+    }
+
+    public static void RuntimeError(RuntimeError error)
+    {
+        Console.WriteLine($"{error.Message}\n[line {error.Token.Line}]");
+        hadRuntimeError = true;
     }
 }
