@@ -2,14 +2,18 @@
 
 namespace CSLox;
 
-public class Interpreter : Expr.IVisitor<object?>
+public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
 {
-    public void Interpret(Expr expr)
+    private Environment environment = new();
+
+    public void Interpret(List<Stmt> statements)
     {
         try
         {
-            var value = Evaluate(expr);
-            Console.WriteLine(Stringify(value));
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
         }
         catch (RuntimeError e)
         {
@@ -161,8 +165,44 @@ public class Interpreter : Expr.IVisitor<object?>
         return obj.ToString();
     }
 
+    public object? VisitExpressionStmt(Stmt.Expression stmt)
+    {
+        Evaluate(stmt.Expr);
+        return null;
+    }
+
+    public object? VisitPrintStmt(Stmt.Print stmt)
+    {
+        var value = Evaluate(stmt.Expr);
+        Console.WriteLine(Stringify(value));
+
+        return null;
+    }
+
+    public object? VisitVarStmt(Stmt.Var stmt)
+    {
+        object? value = null;
+        if (stmt.Initializer != null)
+        {
+            value = Evaluate(stmt.Initializer);
+        }
+
+        environment.Define(stmt.Name.Lexeme, value);
+        return null;
+    }
+
+    public object? VisitVariableExpr(Expr.Variable expr)
+    {
+        return environment.Get(expr.Name);
+    }
+
     private object? Evaluate(Expr expr)
     {
         return expr.Accept(this);
+    }
+
+    private void Execute(Stmt statement)
+    {
+        statement.Accept(this);
     }
 }

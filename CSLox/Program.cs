@@ -5,7 +5,7 @@ class Program
     private static bool hadError = false;
     private static bool hadRuntimeError = false;
 
-    private static Interpreter interpreter = new Interpreter();
+    private static Interpreter interpreter = new();
 
     public static void Main(string[] args)
     {
@@ -13,7 +13,7 @@ class Program
         {
             case > 1:
                 Console.WriteLine("Usage: cslox [script]");
-                Environment.Exit(64);
+                System.Environment.Exit(64);
                 break;
             case 1:
                 RunFile(args[0]);
@@ -32,12 +32,12 @@ class Program
         // Indicate an error in the exit code.
         if (hadError)
         {
-            Environment.Exit(65);
+            System.Environment.Exit(65);
         }
 
         if (hadRuntimeError)
         {
-            Environment.Exit(70);
+            System.Environment.Exit(70);
         }
     }
 
@@ -63,7 +63,7 @@ class Program
         var scanner = new Scanner(source);
         var tokens = scanner.ScanTokens();
         var parser = new Parser(tokens);
-        var expression = parser.Parse();
+        var statements = parser.Parse();
 
         // Stop if there was a syntax error.
         if (hadError)
@@ -71,9 +71,7 @@ class Program
             return;
         }
 
-        interpreter.Interpret(expression);
-
-        Console.WriteLine(new AstPrinter().Print(expression));
+        interpreter.Interpret(statements);
     }
 
     public static void Error(int line, string message)

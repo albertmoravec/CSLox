@@ -15,7 +15,14 @@ class Program
             "Binary   : Expr left, Token oper, Expr right",
             "Grouping : Expr expression",
             "Literal  : object? value",
-            "Unary    : Token oper, Expr right"
+            "Unary    : Token oper, Expr right",
+            "Variable : Token name"
+        ]);
+
+        DefineAst(outputDir, "Stmt", [
+            "Expression : Expr expr",
+            "Print      : Expr expr",
+            "Var        : Token name, Expr? initializer"
         ]);
     }
 
