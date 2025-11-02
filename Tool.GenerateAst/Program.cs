@@ -12,6 +12,7 @@ class Program
 
         var outputDir = args[0];
         DefineAst(outputDir, "Expr", [
+            "Assign   : Token name, Expr value",
             "Binary   : Expr left, Token oper, Expr right",
             "Grouping : Expr expression",
             "Literal  : object? value",
@@ -20,6 +21,7 @@ class Program
         ]);
 
         DefineAst(outputDir, "Stmt", [
+            "Block      : List<Stmt> statements",
             "Expression : Expr expr",
             "Print      : Expr expr",
             "Var        : Token name, Expr? initializer"

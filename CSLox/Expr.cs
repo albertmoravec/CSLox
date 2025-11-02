@@ -2,6 +2,7 @@ namespace CSLox;
 
 public abstract class Expr {
     public interface IVisitor<TR> {
+        TR VisitAssignExpr(Assign expr);
         TR VisitBinaryExpr(Binary expr);
         TR VisitGroupingExpr(Grouping expr);
         TR VisitLiteralExpr(Literal expr);
@@ -9,6 +10,15 @@ public abstract class Expr {
         TR VisitVariableExpr(Variable expr);
     }
 
+    public class Assign(Token name, Expr value) : Expr {
+        public override TR Accept<TR>(IVisitor<TR> visitor)
+        {
+            return visitor.VisitAssignExpr(this);
+        }
+
+        public Token Name { get; set; } = name;
+        public Expr Value { get; set; } = value;
+    }
     public class Binary(Expr left, Token oper, Expr right) : Expr {
         public override TR Accept<TR>(IVisitor<TR> visitor)
         {

@@ -21,6 +21,13 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
         }
     }
 
+    public object? VisitAssignExpr(Expr.Assign expr)
+    {
+        var value = Evaluate(expr.Value);
+        environment.Assign(expr.Name, value);
+        return value;
+    }
+
     public object? VisitBinaryExpr(Expr.Binary expr)
     {
         var left = Evaluate(expr.Left);
@@ -196,6 +203,12 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
         return environment.Get(expr.Name);
     }
 
+    public object? VisitBlockStmt(Stmt.Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new Environment(environment));
+        return null;
+    }
+
     private object? Evaluate(Expr expr)
     {
         return expr.Accept(this);
@@ -204,5 +217,24 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
     private void Execute(Stmt statement)
     {
         statement.Accept(this);
+    }
+
+    private void ExecuteBlock(List<Stmt> statements, Environment blockEnvironment)
+    {
+        var previous = environment;
+
+        try
+        {
+            environment = blockEnvironment;
+
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            environment = previous;
+        }
     }
 }

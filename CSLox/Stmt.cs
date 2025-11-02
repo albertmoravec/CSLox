@@ -2,11 +2,20 @@ namespace CSLox;
 
 public abstract class Stmt {
     public interface IVisitor<TR> {
+        TR VisitBlockStmt(Block stmt);
         TR VisitExpressionStmt(Expression stmt);
         TR VisitPrintStmt(Print stmt);
         TR VisitVarStmt(Var stmt);
     }
 
+    public class Block(List<Stmt> statements) : Stmt {
+        public override TR Accept<TR>(IVisitor<TR> visitor)
+        {
+            return visitor.VisitBlockStmt(this);
+        }
+
+        public List<Stmt> Statements { get; set; } = statements;
+    }
     public class Expression(Expr expr) : Stmt {
         public override TR Accept<TR>(IVisitor<TR> visitor)
         {
