@@ -209,6 +209,43 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
         return null;
     }
 
+    public object? VisitIfStmt(Stmt.If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.ThenBranch);
+        }
+        else if (stmt.ElseBranch != null)
+        {
+            Execute(stmt.ElseBranch);
+        }
+
+        return null;
+    }
+
+    public object? VisitLogicalExpr(Expr.Logical expr)
+    {
+        var left = Evaluate(expr.Left);
+
+        if (expr.Oper.Type == TokenType.Or)
+        {
+            if (IsTruthy(left))
+            {
+                return left;
+            }
+        }
+        else
+        {
+            if (!IsTruthy(left))
+            {
+                return left;
+            }
+                
+        }
+        
+        return Evaluate(expr.Right);
+    }
+
     private object? Evaluate(Expr expr)
     {
         return expr.Accept(this);

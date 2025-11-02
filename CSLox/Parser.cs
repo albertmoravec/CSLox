@@ -51,12 +51,33 @@ public class Parser(List<Token> tokens)
             return PrintStatement();
         }
 
+        if (Match(TokenType.If))
+        {
+            return IfStatement();
+        }
+
         if (Match(TokenType.LeftBrace))
         {
             return new Stmt.Block(Block());
         }
 
         return ExpressionStatement();
+    }
+
+    private Stmt IfStatement()
+    {
+        Consume(TokenType.LeftParen, "Expect '(' after if.");
+        var condition = Expression();
+        Consume(TokenType.RightParen, "Expect ')' after if condition.");
+
+        var thenBranch = Statement();
+        Stmt? elseBranch = null;
+        if (Match(TokenType.Else))
+        {
+            elseBranch = Statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private Stmt PrintStatement()
@@ -102,7 +123,7 @@ public class Parser(List<Token> tokens)
 
     private Expr Assignment()
     {
-        var expr = Equality();
+        var expr = Or();
 
         if (Match(TokenType.Equal))
         {
@@ -118,6 +139,34 @@ public class Parser(List<Token> tokens)
             Error(equals, "Invalid assignment target.");
         }
 
+        return expr;
+    }
+
+    private Expr Or()
+    {
+        var expr = And();
+
+        while (Match(TokenType.Or))
+        {
+            var @operator = Previous();
+            var right = And();
+            expr = new Expr.Logical(expr, @operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr And()
+    {
+        var expr = Equality();
+
+        while (Match(TokenType.And))
+        {
+            var @operator = Previous();
+            var right = Equality();
+            expr = new Expr.Logical(expr, @operator, right);
+        }
+        
         return expr;
     }
 

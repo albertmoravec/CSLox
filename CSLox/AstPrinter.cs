@@ -39,6 +39,11 @@ public class AstPrinter : Expr.IVisitor<string>
         return $"var {expr.Name.Lexeme}";
     }
 
+    public string VisitLogicalExpr(Expr.Logical expr)
+    {
+        return Parenthesize(expr.Oper.Lexeme, expr.Left, expr.Right);
+    }
+
     private string Parenthesize(string name, params Expr[] exprs)
     {
         var builder = new StringBuilder();
