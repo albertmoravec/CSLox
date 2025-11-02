@@ -7,6 +7,7 @@ public abstract class Stmt {
         TR VisitIfStmt(If stmt);
         TR VisitPrintStmt(Print stmt);
         TR VisitVarStmt(Var stmt);
+        TR VisitWhileStmt(While stmt);
     }
 
     public class Block(List<Stmt> statements) : Stmt {
@@ -51,6 +52,15 @@ public abstract class Stmt {
 
         public Token Name { get; set; } = name;
         public Expr? Initializer { get; set; } = initializer;
+    }
+    public class While(Expr condition, Stmt body) : Stmt {
+        public override TR Accept<TR>(IVisitor<TR> visitor)
+        {
+            return visitor.VisitWhileStmt(this);
+        }
+
+        public Expr Condition { get; set; } = condition;
+        public Stmt Body { get; set; } = body;
     }
 
     public abstract TR Accept<TR>(IVisitor<TR> visitor);

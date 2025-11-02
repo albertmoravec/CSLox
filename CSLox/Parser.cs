@@ -46,14 +46,19 @@ public class Parser(List<Token> tokens)
 
     private Stmt Statement()
     {
+        if (Match(TokenType.If))
+        {
+            return IfStatement();
+        }
+
         if (Match(TokenType.Print))
         {
             return PrintStatement();
         }
 
-        if (Match(TokenType.If))
+        if (Match(TokenType.While))
         {
-            return IfStatement();
+            return WhileStatement();
         }
 
         if (Match(TokenType.LeftBrace))
@@ -68,7 +73,7 @@ public class Parser(List<Token> tokens)
     {
         Consume(TokenType.LeftParen, "Expect '(' after if.");
         var condition = Expression();
-        Consume(TokenType.RightParen, "Expect ')' after if condition.");
+        Consume(TokenType.RightParen, "Expect ')' after condition.");
 
         var thenBranch = Statement();
         Stmt? elseBranch = null;
@@ -99,6 +104,17 @@ public class Parser(List<Token> tokens)
 
         Consume(TokenType.Semicolon, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
+    }
+
+    private Stmt WhileStatement()
+    {
+        Consume(TokenType.LeftParen, "Expect '(' after while.");
+        var condition = Expression();
+        Consume(TokenType.RightParen, "Expect ')' after condition.");
+
+        var body = Statement();
+
+        return new Stmt.While(condition, body);
     }
 
     private Stmt ExpressionStatement()
@@ -166,7 +182,7 @@ public class Parser(List<Token> tokens)
             var right = Equality();
             expr = new Expr.Logical(expr, @operator, right);
         }
-        
+
         return expr;
     }
 
