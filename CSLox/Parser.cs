@@ -46,6 +46,11 @@ public class Parser(List<Token> tokens)
 
     private Stmt Statement()
     {
+        if (Match(TokenType.For))
+        {
+            return ForStatement();
+        }
+
         if (Match(TokenType.If))
         {
             return IfStatement();
@@ -67,6 +72,67 @@ public class Parser(List<Token> tokens)
         }
 
         return ExpressionStatement();
+    }
+
+    private Stmt ForStatement()
+    {
+        Consume(TokenType.LeftParen, "Expect '(' after 'for'.");
+
+        // Parse for loop initializer
+        Stmt? initializer;
+        if (Match(TokenType.Semicolon))
+        {
+            initializer = null;
+        }
+        else if (Match(TokenType.Var))
+        {
+            initializer = VarDeclaration();
+        }
+        else
+        {
+            initializer = ExpressionStatement();
+        }
+
+        // Parse for loop condition
+        Expr? condition = null;
+        if (!Check(TokenType.Semicolon))
+        {
+            condition = Expression();
+        }
+
+        Consume(TokenType.Semicolon, "Expect ';' after loop condition.");
+
+        // Parse for loop increment expression
+        Expr? increment = null;
+        if (!Check(TokenType.RightParen))
+        {
+            increment = Expression();
+        }
+
+        Consume(TokenType.RightParen, "Expect ')' after for clauses.");
+
+        // Parse for loop body
+        var body = Statement();
+
+        if (increment != null)
+        {
+            // Append increment to loop body
+            body = new Stmt.Block([body, new Stmt.Expression(increment)]);
+        }
+
+        // Assign "true" to condition in case none was passed - ensures an infinite loop is created
+        condition ??= new Expr.Literal(true);
+
+        // Turn for-loop into while statement
+        body = new Stmt.While(condition, body);
+
+        if (initializer != null)
+        {
+            // Prepend initializer before while loop body
+            body = new Stmt.Block([initializer, body]);
+        }
+
+        return body;
     }
 
     private Stmt IfStatement()
