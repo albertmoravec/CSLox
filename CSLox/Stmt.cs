@@ -4,6 +4,7 @@ public abstract class Stmt {
     public interface IVisitor<TR> {
         TR VisitBlockStmt(Block stmt);
         TR VisitExpressionStmt(Expression stmt);
+        TR VisitFunctionStmt(Function stmt);
         TR VisitIfStmt(If stmt);
         TR VisitPrintStmt(Print stmt);
         TR VisitVarStmt(Var stmt);
@@ -25,6 +26,16 @@ public abstract class Stmt {
         }
 
         public Expr Expr { get; set; } = expr;
+    }
+    public class Function(Token name, List<Token> parameters, List<Stmt> body) : Stmt {
+        public override TR Accept<TR>(IVisitor<TR> visitor)
+        {
+            return visitor.VisitFunctionStmt(this);
+        }
+
+        public Token Name { get; set; } = name;
+        public List<Token> Parameters { get; set; } = parameters;
+        public List<Stmt> Body { get; set; } = body;
     }
     public class If(Expr condition, Stmt thenBranch, Stmt? elseBranch) : Stmt {
         public override TR Accept<TR>(IVisitor<TR> visitor)

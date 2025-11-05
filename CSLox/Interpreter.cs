@@ -1,10 +1,29 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace CSLox;
 
 public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
 {
-    private Environment environment = new();
+    private class ClockCallable : ILoxCallable
+    {
+        public int Arity() => 0;
+
+        public object? Call(Interpreter interpreter, List<object?> arguments)
+        {
+            return (double)DateTime.Now.Millisecond;
+        }
+    }
+
+    private readonly Environment globals = new();
+    private Environment environment;
+
+    public Interpreter()
+    {
+        environment = globals;
+
+        globals.Define("clock", new ClockCallable());
+    }
 
     public void Interpret(List<Stmt> statements)
     {
@@ -250,10 +269,32 @@ public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
             {
                 return left;
             }
-                
         }
-        
+
         return Evaluate(expr.Right);
+    }
+
+    public object? VisitCallExpr(Expr.Call expr)
+    {
+        var callee = Evaluate(expr.Callee);
+
+        var arguments = new List<object?>();
+        foreach (var argument in expr.Arguments)
+        {
+            arguments.Add(Evaluate(argument));
+        }
+
+        if (callee is not ILoxCallable function)
+        {
+            throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
+        }
+
+        if (arguments.Count != function.Arity())
+        {
+            throw new RuntimeError(expr.Paren, $"Expected {function.Arity()} arguments but got {arguments.Count}.");
+        }
+
+        return function.Call(this, arguments);
     }
 
     private object? Evaluate(Expr expr)
